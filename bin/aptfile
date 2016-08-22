@@ -22,7 +22,7 @@ help() {
   echo "  -h, --help     Display this help message"
   echo "  -v, --version  Display the version number"
   echo
-  echo "  For more information, see https://github.com/seatgeek/aptfile"
+  echo "  For more information, see https://github.com/seatgeek/bash-aptfile"
   echo
 }
 
