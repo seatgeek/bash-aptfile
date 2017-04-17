@@ -95,6 +95,8 @@ Running update
 🚀 ALL GOOD TO GO
 ```
 
+Note that `aptfile` runs uses `--force-confnew` - it will forcibly use the package's version of a conf file if a conflict is found.
+
 ## aptfile primitives
 
 You can use any of the following primitives when creating your service's aptfile:
