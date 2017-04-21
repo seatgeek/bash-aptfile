@@ -26,7 +26,8 @@ RUN mkdir -p /data/build/usr/local/bin /data/build/var/lib/aptfile
 
 COPY bin/aptfile /data/build/usr/local/bin/aptfile
 
-RUN echo "VERSION" > /data/build/var/lib/aptfile/VERSION
+RUN echo "VERSION" > /data/build/var/lib/aptfile/VERSION \
+    && chmod +x /data/build/usr/local/bin/aptfile
 
 RUN fpm --log warn \
         -s dir \
