@@ -156,7 +156,7 @@ repository() {
   [[ -z $1 ]] && log_fail "Please specify a repository to setup"
   local repo="$1"
   if [[ -d /etc/apt/sources.list.d/ ]]; then
-    grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/* | grep -q "$repo" && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} repository $repo" && return 0
+    grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/* | grep -Fq "$repo" && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} repository $repo" && return 0
   fi
   add-apt-repository -y "$repo" > "$TMP_APTFILE_LOGFILE" 2>&1
   [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} repository $pkg"
