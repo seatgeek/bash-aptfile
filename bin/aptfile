@@ -141,6 +141,22 @@ package() {
   log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} package $pkg"
 }
 
+function packagelist {
+  [[ $TRACE ]] && set -x
+  [[ -z $1 ]] && log_fail "Please specify at least one package to install"
+  local input_packages=$@
+  local install_packages=()
+  for pkg in $input_packages; do
+    dpkg --force-confnew -s "$pkg" > "$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $pkg" && continue
+    install_packages+=($pkg)
+  done
+  if [[ ${#install_packages[@]} -gt 0 ]]; then
+    apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y --force-yes install ${install_packages[@]}
+    [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} packages ${install_packages[@]}"
+    log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} packages ${install_packages[@]}"
+  fi
+}
+
 ppa() {
   [[ $TRACE ]] && set -x
   [[ -z $1 ]] && log_fail "Please specify a repository to setup"
@@ -197,6 +213,7 @@ aptfile_preprocess_source "$APTFILE_INPUT"
 
 export -f update
 export -f package
+export -f packagelist
 export -f ppa
 export -f repository
 export -f debconf_selection

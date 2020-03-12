@@ -117,6 +117,14 @@ Installs a single package:
 package "git-core"
 ```
 
+### packagelist
+
+Installs a multiple packages in one apt call:
+
+```shell
+packagelist "git-core" "gitsome"
+```
+
 ### repository
 
 Installs an aptitude repository via `add-apt-repository`:
