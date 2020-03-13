@@ -126,6 +126,20 @@ repository "deb http://us.archive.ubuntu.com/ubuntu/ saucy universe multiverse"
 repository "ppa:mozillateam/firefox-next"
 ```
 
+### repository_file
+
+Installs an aptitude repository in `/etc/apt/sources.list.d`:
+
+```shell
+# Add the exact line to /etc/apt/sources.list.d/google-chrome.list
+repository_file "google-chrome" "deb http://dl.google.com/linux/chrome/deb/ stable main"
+# without 'deb', suite (defaults to lsb_release -sc) and components (defaults to 'main') are added
+# All three lines do the same (on xenial)
+repository_file "git-lfs.list" "deb https://packagecloud.io/github/git-lfs/ubuntu/ xenial main"
+repository_file "git-lfs.list" "https://packagecloud.io/github/git-lfs/ubuntu/ main"
+repository_file "git-lfs.list" "https://packagecloud.io/github/git-lfs/ubuntu/"
+```
+
 ### ppa
 
 The preferred method for installing a ppa as it properly handles not re-running `add-apt-repository`:

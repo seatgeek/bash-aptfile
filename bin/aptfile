@@ -164,6 +164,44 @@ repository() {
   log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} repository $repo"
 }
 
+repository_file() {
+  [[ $TRACE ]] && set -x
+  [[ -z $2 ]] && log_fail "Please specify a filename and sourceline to setup"
+  local repofile="$1"
+  local repo="$2"
+  # sourceline is not a complete repo configuration, needs modifying
+  # i.e. not sourceline="deb http://domain.invalid/debian buster main extra"
+  if [[ "$repo" != "deb "* ]]; then
+    releasename=$(lsb_release -sc)
+    if [[ "$repo" == *" "* ]]; then
+      # Components given in sourceline, adding suite 
+      # i.e. sourceline="http://domain.invalid/debian main"
+      repo="deb ${repo/ / $releasename }"
+    else
+      # only URL given, adding suite and component
+      # i.e. sourceline="http://domain.invalid/debian"
+      repo="deb ${repo} $releasename main"
+    fi
+  fi
+
+  if [[ "$repofile" != *.list ]]; then
+    # Adding extension to enable parsing file
+    repofile=${repofile}.list
+  fi
+  # Adding path
+  repofile="/etc/apt/sources.list.d/$repofile"
+
+  [[ -d "/etc/apt/sources.list.d" ]] || mkdir -p /etc/apt/sources.list.d
+
+  grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/* | grep -Fq "$repo" && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} repository $repo" && return 0
+
+  echo "Writing '$repo' to file '$repofile'" > "$TMP_APTFILE_LOGFILE"
+  echo "$repo" >"$repofile" 2>> "$TMP_APTFILE_LOGFILE"
+  [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} repository $pkg"
+  update
+  log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} repository $repo"
+}
+
 debconf_selection() {
   [[ $TRACE ]] && set -x
   [[ -z $1 ]] && log_fail "Please specify a debconf line"
@@ -199,6 +237,7 @@ export -f update
 export -f package
 export -f ppa
 export -f repository
+export -f repository_file
 export -f debconf_selection
 export -f log_fail
 export -f log_info
