@@ -57,6 +57,9 @@ debconf_selection "mysql mysql-server/root_password_again password root"
 # install another package
 package "mysql-server"
 
+# install a package from a download url
+package_from_url "google-chrome-stable" "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+
 # you can also execute arbitrary bash
 echo "🚀  ALL GOOD TO GO"
 ```
@@ -92,6 +95,7 @@ Running update
 [OK] set debconf line: mysql mysql-server/root_password password root
 [OK] set debconf line: mysql mysql-server/root_password_again password root
 [NEW] package mysql-server
+[NEW] package google-chrome-stable
 🚀 ALL GOOD TO GO
 ```
 
@@ -115,6 +119,14 @@ Installs a single package:
 
 ```shell
 package "git-core"
+```
+
+### package_from_url
+
+Installs a single package from a url:
+
+```shell
+package_from_url "google-chrome-stable" "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
 ```
 
 ### packagelist
