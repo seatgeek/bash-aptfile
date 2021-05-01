@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $TRACE ]] && set -x && export TRACE=$TRACE
+set -eo pipefail
+[[ $TRACE ]] && set -x && export TRACE=$TRACE
 
 version() {
   local VERSION="dev-master"
@@ -46,7 +47,8 @@ abs_dirname() {
 }
 
 expand_path() {
-  { cd "$(dirname "$1")" 2>/dev/null
+  {
+    cd "$(dirname "$1")" 2>/dev/null
     local dirname="$PWD"
     cd "$OLDPWD"
     echo "$dirname/$(basename "$1")"
@@ -74,18 +76,18 @@ done
 
 for option in "${options[@]}"; do
   case "$option" in
-  "h" | "help" )
-    help
-    exit 0
-    ;;
-  "v" | "version" )
-    version
-    exit 0
-    ;;
-  * )
-    usage >&2
-    exit 1
-    ;;
+    "h" | "help")
+      help
+      exit 0
+      ;;
+    "v" | "version")
+      version
+      exit 0
+      ;;
+    *)
+      usage >&2
+      exit 1
+      ;;
   esac
 done
 
@@ -98,12 +100,12 @@ if [ "${#arguments[@]}" -eq 0 ]; then
   set -- "aptfile" "$@"
 fi
 
-export APTFILE_COLOR_OFF="\033[0m"   # unsets color to term fg color
-export APTFILE_RED="\033[0;31m"      # red
-export APTFILE_GREEN="\033[0;32m"    # green
-export APTFILE_YELLOW="\033[0;33m"   # yellow
-export APTFILE_MAGENTA="\033[0;35m"  # magenta
-export APTFILE_CYAN="\033[0;36m"     # cyan
+export APTFILE_COLOR_OFF="\033[0m"  # unsets color to term fg color
+export APTFILE_RED="\033[0;31m"     # red
+export APTFILE_GREEN="\033[0;32m"   # green
+export APTFILE_YELLOW="\033[0;33m"  # yellow
+export APTFILE_MAGENTA="\033[0;35m" # magenta
+export APTFILE_CYAN="\033[0;36m"    # cyan
 
 logfile=$(basename "$0")
 TMP_APTFILE_LOGFILE=$(mktemp "/tmp/${logfile}.XXXXXX") || {
@@ -127,7 +129,7 @@ log_info() {
 update() {
   [[ $TRACE ]] && set -x
   log_info "Running update"
-  apt-get update > "$TMP_APTFILE_LOGFILE" 2>&1
+  apt-get update >"$TMP_APTFILE_LOGFILE" 2>&1
   [[ $? -eq 0 ]] || log_fail "Failed to run update"
 }
 
@@ -135,7 +137,7 @@ package() {
   [[ $TRACE ]] && set -x
   [[ -z $1 ]] && log_fail "Please specify a package to install"
   local pkg="$1"
-  dpkg --force-confnew -s "$pkg" > "$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $pkg" && return 0
+  dpkg --force-confnew -s "$pkg" >"$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $pkg" && return 0
   apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y --force-yes install "$pkg"
   [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} package $pkg"
   log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} package $pkg"
@@ -147,19 +149,19 @@ package_from_url() {
   local name=$1
   local url=$2
   if type curl >/dev/null 2>&1; then
-        local dl_cmd="curl"
-        local dl_options="-so"
-    elif type wget >/dev/null 2>&1; then
-        local dl_cmd="wget"
-        local dl_options="-qO"
-    else
-        log_fail "Neither curl nor wget found. Unable to download $url"
-    fi
-  dpkg --force-confnew -s "$name" > "$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $name" && return 0
+    local dl_cmd="curl"
+    local dl_options="-so"
+  elif type wget >/dev/null 2>&1; then
+    local dl_cmd="wget"
+    local dl_options="-qO"
+  else
+    log_fail "Neither curl nor wget found. Unable to download $url"
+  fi
+  dpkg --force-confnew -s "$name" >"$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $name" && return 0
   tempdir=$(mktemp -d)
   $dl_cmd $dl_options $tempdir/${name}.deb $url \
     && apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y --force-yes install "$tempdir/${name}.deb"
-  if [[ $? -ne 0 ]]; then 
+  if [[ $? -ne 0 ]]; then
     rm -r $tempdir
     log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} package $name"
   fi
@@ -173,7 +175,7 @@ packagelist() {
   local input_packages=$@
   local install_packages=()
   for pkg in $input_packages; do
-    dpkg --force-confnew -s "$pkg" > "$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $pkg" && continue
+    dpkg --force-confnew -s "$pkg" >"$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $pkg" && continue
     install_packages+=($pkg)
   done
   if [[ ${#install_packages[@]} -gt 0 ]]; then
@@ -200,7 +202,7 @@ repository() {
   if [[ -d /etc/apt/sources.list.d/ ]]; then
     grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/* | grep -Fq "$repo" && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} repository $repo" && return 0
   fi
-  add-apt-repository -y "$repo" > "$TMP_APTFILE_LOGFILE" 2>&1
+  add-apt-repository -y "$repo" >"$TMP_APTFILE_LOGFILE" 2>&1
   [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} repository $pkg"
   update
   log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} repository $repo"
@@ -216,7 +218,7 @@ repository_file() {
   if [[ "$repo" != "deb "* ]]; then
     releasename=$(lsb_release -sc)
     if [[ "$repo" == *" "* ]]; then
-      # Components given in sourceline, adding suite 
+      # Components given in sourceline, adding suite
       # i.e. sourceline="http://domain.invalid/debian main"
       repo="deb ${repo/ / $releasename }"
     else
@@ -237,8 +239,8 @@ repository_file() {
 
   grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/* | grep -Fq "$repo" && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} repository $repo" && return 0
 
-  echo "Writing '$repo' to file '$repofile'" > "$TMP_APTFILE_LOGFILE"
-  echo "$repo" >"$repofile" 2>> "$TMP_APTFILE_LOGFILE"
+  echo "Writing '$repo' to file '$repofile'" >"$TMP_APTFILE_LOGFILE"
+  echo "$repo" >"$repofile" 2>>"$TMP_APTFILE_LOGFILE"
   [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} repository $pkg"
   update
   log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} repository $repo"
@@ -263,7 +265,7 @@ APTFILE_TMPNAME="$APTFILE_TMPDIR/aptfile.$$"
 APTFILE_OUTPUT="${APTFILE_TMPNAME}.out"
 
 aptfile_preprocess_source() {
-  tail -n +2 "$1" > "$APTFILE_OUTPUT"
+  tail -n +2 "$1" >"$APTFILE_OUTPUT"
   trap "aptfile_cleanup_preprocessed_source" err exit
   trap "aptfile_cleanup_preprocessed_source; exit 1" int
 }
