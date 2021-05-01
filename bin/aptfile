@@ -138,7 +138,7 @@ package() {
   [[ -z $1 ]] && log_fail "Please specify a package to install"
   local pkg="$1"
   dpkg --force-confnew -s "$pkg" >"$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $pkg" && return 0
-  apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y --force-yes install "$pkg"
+  apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y install "$pkg"
   [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} package $pkg"
   log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} package $pkg"
 }
@@ -160,7 +160,7 @@ package_from_url() {
   dpkg --force-confnew -s "$name" >"$TMP_APTFILE_LOGFILE" 2>&1 && log_info "${APTFILE_CYAN}[OK]${APTFILE_COLOR_OFF} package $name" && return 0
   tempdir=$(mktemp -d)
   $dl_cmd $dl_options $tempdir/${name}.deb $url \
-    && apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y --force-yes install "$tempdir/${name}.deb"
+    && apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y install "$tempdir/${name}.deb"
   if [[ $? -ne 0 ]]; then
     rm -r $tempdir
     log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} package $name"
@@ -179,7 +179,7 @@ packagelist() {
     install_packages+=($pkg)
   done
   if [[ ${#install_packages[@]} -gt 0 ]]; then
-    apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y --force-yes install ${install_packages[@]}
+    apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" -qq -y install ${install_packages[@]}
     [[ $? -eq 0 ]] || log_fail "${APTFILE_RED}[FAIL]${APTFILE_COLOR_OFF} packages ${install_packages[@]}"
     log_info "${APTFILE_GREEN}[NEW]${APTFILE_COLOR_OFF} packages ${install_packages[@]}"
   fi
