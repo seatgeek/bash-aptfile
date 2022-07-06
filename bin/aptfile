@@ -133,6 +133,31 @@ update() {
   [[ $? -eq 0 ]] || log_fail "Failed to run update"
 }
 
+upgrade() {
+  [[ $TRACE ]] && set -x
+  log_info "Running upgrade"
+
+  apt-get upgrade >"$TMP_APTFILE_LOGFILE" 2>&1
+  [[ $? -eq 0 ]] || log_fail "Failed to run upgrade"
+}
+
+autoremove() {
+  [[ $TRACE ]] && set -x
+  log_info "Running autoremove"
+
+  apt-get autoremove >"$TMP_APTFILE_LOGFILE" 2>&1
+  [[ $? -eq 0 ]] || log_fail "Failed to run autoremove"
+}
+
+autoclean() {
+  [[ $TRACE ]] && set -x
+  log_info "Running autoclean"
+
+  apt-get autoclean >"$TMP_APTFILE_LOGFILE" 2>&1
+  [[ $? -eq 0 ]] || log_fail "Failed to run autoclean"
+}
+
+
 package() {
   [[ $TRACE ]] && set -x
   [[ -z $1 ]] && log_fail "Please specify a package to install"
@@ -287,6 +312,9 @@ export -f repository_file
 export -f debconf_selection
 export -f log_fail
 export -f log_info
+export -f upgrade
+export -f autoclean
+export -f autoremove
 
 chmod +x "$APTFILE_OUTPUT"
 exec "$APTFILE_OUTPUT"
